@@ -7,6 +7,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { GoalsModule } from './modules/goals/goals.module';
 import { StepsModule } from './modules/steps/steps.module';
+import { ActivityModule } from './modules/activity/activity.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
 import { HealthModule } from './modules/health/health.module';
 
 @Module({
@@ -30,6 +32,8 @@ import { HealthModule } from './modules/health/health.module';
     CategoriesModule,
     GoalsModule,
     StepsModule,
+    ActivityModule,
+    DashboardModule,
     HealthModule,
   ],
 })
