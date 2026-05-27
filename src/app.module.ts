@@ -6,6 +6,7 @@ import { validationSchema } from './config/validation.schema';
 import { AuthModule } from './modules/auth/auth.module';
 import { CategoriesModule } from './modules/categories/categories.module';
 import { GoalsModule } from './modules/goals/goals.module';
+import { StepsModule } from './modules/steps/steps.module';
 import { HealthModule } from './modules/health/health.module';
 
 @Module({
@@ -28,6 +29,7 @@ import { HealthModule } from './modules/health/health.module';
     AuthModule,
     CategoriesModule,
     GoalsModule,
+    StepsModule,
     HealthModule,
   ],
 })

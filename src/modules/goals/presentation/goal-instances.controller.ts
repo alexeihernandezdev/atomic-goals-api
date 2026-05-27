@@ -17,7 +17,49 @@ import {
 import { GetGoalInstanceUseCase } from '../application/use-cases/get-goal-instance.use-case';
 import { UpdateGoalInstanceStatusUseCase } from '../application/use-cases/update-goal-instance-status.use-case';
 import { CompleteGoalInstanceUseCase } from '../application/use-cases/complete-goal-instance.use-case';
+import { ListStepsByGoalInstanceUseCase } from '../../steps/application/use-cases/list-steps-by-goal-instance.use-case';
 import { UpdateGoalInstanceStatusDto } from './dto/update-goal-instance-status.dto';
+import { ProgressBarStep } from '../../steps/domain/entities/progress-bar-step.entity';
+import { CheckStep } from '../../steps/domain/entities/check-step.entity';
+import { StatusStep } from '../../steps/domain/entities/status-step.entity';
+import { CounterStep } from '../../steps/domain/entities/counter-step.entity';
+import type { Step } from '../../steps/domain/entities/step.entity';
+
+function toStepResponse(step: Step) {
+  const base = {
+    id: step.id.value,
+    type: step.type,
+    title: step.title,
+    description: step.description,
+    weight: step.weight,
+    order: step.order,
+    progress: step.progress(),
+    deletedAt: step.deletedAt,
+  };
+  if (step instanceof ProgressBarStep)
+    return {
+      ...base,
+      current: step.current,
+      target: step.target,
+      unit: step.unit,
+    };
+  if (step instanceof CheckStep) return { ...base, done: step.done };
+  if (step instanceof StatusStep)
+    return {
+      ...base,
+      statuses: step.statuses,
+      currentStatusId: step.currentStatusId,
+    };
+  if (step instanceof CounterStep)
+    return {
+      ...base,
+      current: step.current,
+      max: step.max,
+      min: step.min,
+      unit: step.unit,
+    };
+  return base;
+}
 
 function toInstanceResponse(instance: GoalInstance) {
   return {
@@ -41,13 +83,20 @@ export class GoalInstancesController {
     private readonly getGoalInstanceUseCase: GetGoalInstanceUseCase,
     private readonly updateGoalInstanceStatusUseCase: UpdateGoalInstanceStatusUseCase,
     private readonly completeGoalInstanceUseCase: CompleteGoalInstanceUseCase,
+    private readonly listStepsByGoalInstanceUseCase: ListStepsByGoalInstanceUseCase,
   ) {}
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get a goal instance by id' })
+  @ApiOperation({ summary: 'Get a goal instance with its steps' })
   async getOne(@Param('id') id: string) {
-    const instance = await this.getGoalInstanceUseCase.execute({ id });
-    return toInstanceResponse(instance);
+    const [instance, steps] = await Promise.all([
+      this.getGoalInstanceUseCase.execute({ id }),
+      this.listStepsByGoalInstanceUseCase.execute({ goalInstanceId: id }),
+    ]);
+    return {
+      ...toInstanceResponse(instance),
+      steps: steps.map(toStepResponse),
+    };
   }
 
   @Patch(':id')
