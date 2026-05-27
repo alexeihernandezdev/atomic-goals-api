@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation.schema';
+import { AuthModule } from './modules/auth/auth.module';
 import { HealthModule } from './modules/health/health.module';
 
 @Module({
@@ -22,6 +23,7 @@ import { HealthModule } from './modules/health/health.module';
         autoLoadEntities: true,
       }),
     }),
+    AuthModule,
     HealthModule,
   ],
 })
