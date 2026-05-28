@@ -9,6 +9,7 @@ import { GoalsModule } from './modules/goals/goals.module';
 import { StepsModule } from './modules/steps/steps.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { TrashModule } from './modules/trash/trash.module';
 import { HealthModule } from './modules/health/health.module';
 
 @Module({
@@ -34,6 +35,7 @@ import { HealthModule } from './modules/health/health.module';
     StepsModule,
     ActivityModule,
     DashboardModule,
+    TrashModule,
     HealthModule,
   ],
 })
