@@ -20,9 +20,13 @@ import { SystemClock } from './infrastructure/clock/system-clock';
 import { TypeOrmUnitOfWork } from './infrastructure/unit-of-work/typeorm-unit-of-work';
 import { GoalsController } from './presentation/goals.controller';
 import { GoalInstancesController } from './presentation/goal-instances.controller';
+import { StepsModule } from '../steps/steps.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([GoalOrmEntity, GoalInstanceOrmEntity])],
+  imports: [
+    TypeOrmModule.forFeature([GoalOrmEntity, GoalInstanceOrmEntity]),
+    StepsModule,
+  ],
   controllers: [GoalsController, GoalInstancesController],
   providers: [
     CreateGoalUseCase,
