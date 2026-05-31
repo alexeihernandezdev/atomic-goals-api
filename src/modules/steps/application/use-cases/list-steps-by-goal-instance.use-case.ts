@@ -12,6 +12,8 @@ export class ListStepsByGoalInstanceUseCase {
   ) {}
 
   async execute(query: { goalInstanceId: string }): Promise<Step[]> {
-    return this.stepRepo.findByGoalInstanceId(Uuid.from(query.goalInstanceId));
+    return this.stepRepo.findActiveByGoalInstanceId(
+      Uuid.from(query.goalInstanceId),
+    );
   }
 }
