@@ -21,6 +21,7 @@ const baseProps = (orm: StepOrmEntity) => ({
   unit: orm.unit ?? undefined,
   startDate: orm.startDate ?? undefined,
   endDate: orm.endDate ?? undefined,
+  cycleDay: orm.cycleDay ?? undefined,
   estimatedDurationMinutes: orm.estimatedDurationMinutes ?? undefined,
   createdAt: orm.createdAt,
   updatedAt: orm.updatedAt,
@@ -105,6 +106,7 @@ export class StepMapper {
     orm.unit = (domain as ProgressBarStep | CounterStep).unit ?? null;
     orm.startDate = domain.startDate ?? null;
     orm.endDate = domain.endDate ?? null;
+    orm.cycleDay = domain.cycleDay ?? null;
     orm.estimatedDurationMinutes = domain.estimatedDurationMinutes ?? null;
     orm.createdAt = domain.createdAt;
     orm.updatedAt = domain.updatedAt;

@@ -16,6 +16,7 @@ interface CreateCounterStepProps {
   unit?: string;
   startDate?: Date;
   endDate?: Date;
+  cycleDay?: string;
   estimatedDurationMinutes?: number;
 }
 
@@ -37,6 +38,7 @@ export class CounterStep extends Step {
     _startDate: Date | undefined,
     _endDate: Date | undefined,
     _estimatedDurationMinutes: number | undefined,
+    _cycleDay: string | undefined,
     _createdAt: Date,
     _updatedAt: Date,
     _deletedAt: Date | undefined,
@@ -56,6 +58,7 @@ export class CounterStep extends Step {
       _startDate,
       _endDate,
       _estimatedDurationMinutes,
+      _cycleDay,
       _createdAt,
       _updatedAt,
       _deletedAt,
@@ -82,6 +85,7 @@ export class CounterStep extends Step {
       props.startDate,
       props.endDate,
       props.estimatedDurationMinutes,
+      props.cycleDay,
       now,
       now,
       undefined,
@@ -104,6 +108,7 @@ export class CounterStep extends Step {
       props.startDate,
       props.endDate,
       props.estimatedDurationMinutes,
+      props.cycleDay,
       props.createdAt,
       props.updatedAt,
       props.deletedAt,

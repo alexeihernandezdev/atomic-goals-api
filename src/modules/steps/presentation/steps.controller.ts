@@ -39,6 +39,7 @@ function toStepResponse(step: Step) {
     progress: step.progress(),
     startDate: step.startDate,
     endDate: step.endDate,
+    cycleDay: step.cycleDay,
     estimatedDurationMinutes: step.estimatedDurationMinutes,
     createdAt: step.createdAt,
     updatedAt: step.updatedAt,
@@ -110,6 +111,7 @@ export class StepsController {
       currentStatusId: dto.currentStatusId,
       startDate: dto.startDate ? new Date(dto.startDate) : undefined,
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      cycleDay: dto.cycleDay,
       estimatedDurationMinutes: dto.estimatedDurationMinutes,
     });
     return toStepResponse(step);
@@ -138,6 +140,7 @@ export class StepsController {
       order: dto.order,
       startDate: dto.startDate ? new Date(dto.startDate) : undefined,
       endDate: dto.endDate ? new Date(dto.endDate) : undefined,
+      cycleDay: dto.cycleDay,
       estimatedDurationMinutes: dto.estimatedDurationMinutes,
     });
     return toStepResponse(step);

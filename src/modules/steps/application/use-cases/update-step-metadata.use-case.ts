@@ -13,6 +13,7 @@ interface UpdateStepMetadataCommand {
   order?: number;
   startDate?: Date;
   endDate?: Date;
+  cycleDay?: string;
   estimatedDurationMinutes?: number;
 }
 
@@ -34,6 +35,7 @@ export class UpdateStepMetadataUseCase {
       order: command.order,
       startDate: command.startDate,
       endDate: command.endDate,
+      cycleDay: command.cycleDay,
       estimatedDurationMinutes: command.estimatedDurationMinutes,
     });
 

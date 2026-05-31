@@ -10,6 +10,7 @@ export interface UpdateStepMetadataProps {
   order?: number;
   startDate?: Date;
   endDate?: Date;
+  cycleDay?: string;
   estimatedDurationMinutes?: number;
 }
 
@@ -25,6 +26,7 @@ export abstract class Step {
     protected _startDate: Date | undefined,
     protected _endDate: Date | undefined,
     protected _estimatedDurationMinutes: number | undefined,
+    protected _cycleDay: string | undefined,
     protected readonly _createdAt: Date,
     protected _updatedAt: Date,
     protected _deletedAt: Date | undefined,
@@ -49,6 +51,7 @@ export abstract class Step {
     if (props.estimatedDurationMinutes !== undefined) {
       this._estimatedDurationMinutes = props.estimatedDurationMinutes;
     }
+    if (props.cycleDay !== undefined) this._cycleDay = props.cycleDay || undefined;
     this._updatedAt = new Date();
   }
 
@@ -91,6 +94,9 @@ export abstract class Step {
   }
   get estimatedDurationMinutes(): number | undefined {
     return this._estimatedDurationMinutes;
+  }
+  get cycleDay(): string | undefined {
+    return this._cycleDay;
   }
   get createdAt(): Date {
     return this._createdAt;

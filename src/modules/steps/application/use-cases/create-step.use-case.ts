@@ -36,6 +36,7 @@ interface CreateStepCommand {
   currentStatusId?: string;
   startDate?: Date;
   endDate?: Date;
+  cycleDay?: string;
   estimatedDurationMinutes?: number;
 }
 
@@ -83,6 +84,7 @@ export class CreateStepUseCase {
       order: command.order,
       startDate: command.startDate,
       endDate: command.endDate,
+      cycleDay: command.cycleDay,
       estimatedDurationMinutes: command.estimatedDurationMinutes,
     };
 

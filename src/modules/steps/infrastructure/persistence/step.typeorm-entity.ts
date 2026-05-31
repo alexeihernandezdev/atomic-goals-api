@@ -46,6 +46,9 @@ export class StepOrmEntity {
   @Column({ type: 'integer', nullable: true })
   estimatedDurationMinutes: number | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  cycleDay: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

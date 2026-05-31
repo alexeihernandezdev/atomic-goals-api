@@ -49,4 +49,9 @@ export class UpdateStepMetadataDto {
   @IsInt()
   @IsPositive()
   estimatedDurationMinutes?: number;
+
+  @ApiPropertyOptional({ example: '1', description: 'Day within cycle (week day, month day, etc.)' })
+  @IsOptional()
+  @IsString()
+  cycleDay?: string;
 }
