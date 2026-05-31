@@ -103,14 +103,17 @@ export class GoalsController {
     @CurrentUser() user: JwtPayload,
     @Query() query: ListGoalsQueryDto,
   ) {
-    const goals = await this.listGoalsUseCase.execute({
+    const results = await this.listGoalsUseCase.execute({
       userId: user.userId,
       categoryId: query.categoryId,
       type: query.type,
       page: query.page,
       limit: query.limit,
     });
-    return goals.map(toGoalResponse);
+    return results.map(({ goal, activeInstance }) => ({
+      ...toGoalResponse(goal),
+      activeInstance: activeInstance ? toInstanceResponse(activeInstance) : null,
+    }));
   }
 
   @Get(':id')
