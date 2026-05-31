@@ -28,12 +28,19 @@ import type { Step } from '../../steps/domain/entities/step.entity';
 function toStepResponse(step: Step) {
   const base = {
     id: step.id.value,
+    goalInstanceId: step.goalInstanceId.value,
     type: step.type,
     title: step.title,
     description: step.description,
     weight: step.weight,
     order: step.order,
     progress: step.progress(),
+    startDate: step.startDate,
+    endDate: step.endDate,
+    cycleDay: step.cycleDay,
+    estimatedDurationMinutes: step.estimatedDurationMinutes,
+    createdAt: step.createdAt,
+    updatedAt: step.updatedAt,
     deletedAt: step.deletedAt,
   };
   if (step instanceof ProgressBarStep)
