@@ -5,5 +5,6 @@ export interface IGoalInstanceRepository {
   findById(id: Uuid): Promise<GoalInstance | null>;
   findByGoalId(goalId: Uuid): Promise<GoalInstance[]>;
   findActiveByGoalId(goalId: Uuid): Promise<GoalInstance | null>;
+  findActiveManyByGoalIds(goalIds: Uuid[]): Promise<GoalInstance[]>;
   save(instance: GoalInstance): Promise<void>;
 }

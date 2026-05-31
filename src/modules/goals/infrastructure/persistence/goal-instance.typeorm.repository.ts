@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import type { GoalInstance } from '../../domain/entities/goal-instance.entity';
 import type { IGoalInstanceRepository } from '../../domain/ports/goal-instance.repository';
 import type { Uuid } from '../../../../shared/domain/value-objects/uuid.vo';
@@ -39,6 +39,17 @@ export class GoalInstanceTypeOrmRepository implements IGoalInstanceRepository {
       where: { goalId: goalId.value, status: GoalInstanceStatus.IN_PROGRESS },
     });
     return orm ? GoalInstanceMapper.toDomain(orm) : null;
+  }
+
+  async findActiveManyByGoalIds(goalIds: Uuid[]): Promise<GoalInstance[]> {
+    if (goalIds.length === 0) return [];
+    const orms = await this.repo.find({
+      where: {
+        goalId: In(goalIds.map((id) => id.value)),
+        status: GoalInstanceStatus.IN_PROGRESS,
+      },
+    });
+    return orms.map((orm) => GoalInstanceMapper.toDomain(orm));
   }
 
   async save(instance: GoalInstance): Promise<void> {
