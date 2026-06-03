@@ -1,6 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsDateString,
   IsEnum,
   IsInt,
   IsOptional,
@@ -49,23 +48,4 @@ export class CreateGoalDto {
   @IsInt()
   @IsPositive()
   customCycleDays?: number;
-
-  @ApiPropertyOptional({ example: '2025-01-01T00:00:00.000Z' })
-  @IsOptional()
-  @IsDateString()
-  startDate?: string;
-
-  @ApiPropertyOptional({ example: '2025-12-31T00:00:00.000Z' })
-  @IsOptional()
-  @IsDateString()
-  endDate?: string;
-
-  @ApiPropertyOptional({
-    example: 30,
-    description: 'Estimated duration in minutes',
-  })
-  @IsOptional()
-  @IsInt()
-  @IsPositive()
-  estimatedDurationMinutes?: number;
 }

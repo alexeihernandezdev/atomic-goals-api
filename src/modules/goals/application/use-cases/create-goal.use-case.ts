@@ -9,6 +9,7 @@ import type { IUnitOfWork } from '../../../../shared/application/ports/unit-of-w
 import { GOAL_TOKENS } from '../../infrastructure/goal.tokens';
 import { Uuid } from '../../../../shared/domain/value-objects/uuid.vo';
 import type { CyclePeriod } from '../../domain/enums/cycle-period.enum';
+import { CONCLUSIVE_OPEN_CYCLE_END } from '../../domain/services/goal-derived-metrics';
 
 interface CreateGoalCommand {
   userId: string;
@@ -18,9 +19,6 @@ interface CreateGoalCommand {
   type: GoalType;
   cyclePeriod?: CyclePeriod;
   customCycleDays?: number;
-  startDate?: Date;
-  endDate?: Date;
-  estimatedDurationMinutes?: number;
 }
 
 interface CreateGoalResult {
@@ -53,17 +51,14 @@ export class CreateGoalUseCase {
       type: command.type,
       cyclePeriod: command.cyclePeriod,
       customCycleDays: command.customCycleDays,
-      startDate: command.startDate,
-      endDate: command.endDate,
-      estimatedDurationMinutes: command.estimatedDurationMinutes,
     });
 
     const now = this.clock.now();
-    const cycleStart = command.startDate ?? now;
+    const cycleStart = now;
     const cycleEnd =
       goal.type === GoalType.CYCLIC
         ? goal.nextCycleEnd(cycleStart)
-        : (command.endDate ?? new Date('9999-12-31T00:00:00.000Z'));
+        : CONCLUSIVE_OPEN_CYCLE_END;
 
     const instance = GoalInstance.create({
       goalId: goal.id,

@@ -16,8 +16,12 @@ import { StatusStepOrmEntity } from './infrastructure/persistence/status-step.ty
 import { CounterStepOrmEntity } from './infrastructure/persistence/counter-step.typeorm-entity';
 import { StepTypeOrmRepository } from './infrastructure/persistence/step.typeorm.repository';
 import { GoalInstanceOrmEntity } from '../goals/infrastructure/persistence/goal-instance.typeorm-entity';
+import { GoalOrmEntity } from '../goals/infrastructure/persistence/goal.typeorm-entity';
 import { GoalInstanceTypeOrmRepository } from '../goals/infrastructure/persistence/goal-instance.typeorm.repository';
+import { GoalTypeOrmRepository } from '../goals/infrastructure/persistence/goal.typeorm.repository';
+import { GOAL_TOKENS } from '../goals/infrastructure/goal.tokens';
 import { TypeOrmUnitOfWork } from '../goals/infrastructure/unit-of-work/typeorm-unit-of-work';
+import { SyncConclusiveInstanceCycleService } from './application/services/sync-conclusive-instance-cycle.service';
 import { StepsController } from './presentation/steps.controller';
 
 @Module({
@@ -29,10 +33,12 @@ import { StepsController } from './presentation/steps.controller';
       StatusStepOrmEntity,
       CounterStepOrmEntity,
       GoalInstanceOrmEntity,
+      GoalOrmEntity,
     ]),
   ],
   controllers: [StepsController],
   providers: [
+    SyncConclusiveInstanceCycleService,
     CreateStepUseCase,
     GetStepUseCase,
     ListStepsByGoalInstanceUseCase,
@@ -46,8 +52,9 @@ import { StepsController } from './presentation/steps.controller';
       provide: STEP_TOKENS.GOAL_INSTANCE_REPOSITORY,
       useClass: GoalInstanceTypeOrmRepository,
     },
+    { provide: GOAL_TOKENS.GOAL_REPOSITORY, useClass: GoalTypeOrmRepository },
     { provide: STEP_TOKENS.UNIT_OF_WORK, useClass: TypeOrmUnitOfWork },
   ],
-  exports: [ListStepsByGoalInstanceUseCase],
+  exports: [ListStepsByGoalInstanceUseCase, STEP_TOKENS.STEP_REPOSITORY],
 })
 export class StepsModule {}

@@ -121,14 +121,22 @@ export class DashboardTypeOrmReadModel implements IDashboardReadModel {
           endDate: Date | null;
         }[]
       >(
-        `SELECT g.id, g.name, g."startDate", g."endDate"
+        `SELECT g.id, g.name,
+                MIN(s."startDate") AS "startDate",
+                MAX(s."endDate") AS "endDate"
          FROM goals g
+         JOIN goal_instances gi ON gi."goalId" = g.id
+           AND gi.status = 'IN_PROGRESS'
+           AND gi."deletedAt" IS NULL
+         JOIN steps s ON s."goalInstanceId" = gi.id
+           AND s."deletedAt" IS NULL
          WHERE g."userId" = $1
            AND g."deletedAt" IS NULL
-           AND (
-             (g."startDate" >= $2 AND g."startDate" <= $3)
-             OR (g."endDate" >= $2 AND g."endDate" <= $3)
-           )`,
+         GROUP BY g.id, g.name
+         HAVING (
+           (MIN(s."startDate") >= $2 AND MIN(s."startDate") <= $3)
+           OR (MAX(s."endDate") >= $2 AND MAX(s."endDate") <= $3)
+         )`,
         [userId, from, to],
       ),
       this.dataSource.query<
@@ -142,10 +150,11 @@ export class DashboardTypeOrmReadModel implements IDashboardReadModel {
         `SELECT s.id, s.title, s."startDate", s."endDate"
          FROM steps s
          JOIN goal_instances gi ON gi.id = s."goalInstanceId"
+           AND gi.status = 'IN_PROGRESS'
+           AND gi."deletedAt" IS NULL
          JOIN goals g ON g.id = gi."goalId"
          WHERE g."userId" = $1
            AND s."deletedAt" IS NULL
-           AND gi."deletedAt" IS NULL
            AND (
              (s."startDate" >= $2 AND s."startDate" <= $3)
              OR (s."endDate" >= $2 AND s."endDate" <= $3)
@@ -208,13 +217,19 @@ export class DashboardTypeOrmReadModel implements IDashboardReadModel {
       this.dataSource.query<
         { id: string; name: string; endDate: Date; progress: string }[]
       >(
-        `SELECT g.id, g.name, g."endDate", COALESCE(gi.progress, 0) AS progress
+        `SELECT g.id, g.name, MAX(s."endDate") AS "endDate", COALESCE(gi.progress, 0) AS progress
          FROM goals g
-         LEFT JOIN goal_instances gi ON gi."goalId" = g.id AND gi.status = 'IN_PROGRESS' AND gi."deletedAt" IS NULL
+         JOIN goal_instances gi ON gi."goalId" = g.id
+           AND gi.status = 'IN_PROGRESS'
+           AND gi."deletedAt" IS NULL
+         JOIN steps s ON s."goalInstanceId" = gi.id
+           AND s."deletedAt" IS NULL
+           AND s."endDate" IS NOT NULL
          WHERE g."userId" = $1
            AND g."deletedAt" IS NULL
-           AND g."endDate" >= $2
-         ORDER BY g."endDate" ASC
+         GROUP BY g.id, g.name, gi.progress
+         HAVING MAX(s."endDate") >= $2
+         ORDER BY MAX(s."endDate") ASC
          LIMIT $3`,
         [userId, now, limit],
       ),
@@ -222,10 +237,11 @@ export class DashboardTypeOrmReadModel implements IDashboardReadModel {
         `SELECT s.id, s.title, s."endDate"
          FROM steps s
          JOIN goal_instances gi ON gi.id = s."goalInstanceId"
+           AND gi.status = 'IN_PROGRESS'
+           AND gi."deletedAt" IS NULL
          JOIN goals g ON g.id = gi."goalId"
          WHERE g."userId" = $1
            AND s."deletedAt" IS NULL
-           AND gi."deletedAt" IS NULL
            AND s."endDate" >= $2
          ORDER BY s."endDate" ASC
          LIMIT $3`,

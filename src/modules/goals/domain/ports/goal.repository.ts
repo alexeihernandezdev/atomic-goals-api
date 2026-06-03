@@ -12,6 +12,7 @@ export interface GoalFilters {
 
 export interface IGoalRepository {
   findById(id: Uuid, userId: Uuid): Promise<Goal | null>;
+  findByIdInternal(id: Uuid): Promise<Goal | null>;
   findByIdWithDeleted(id: Uuid, userId: Uuid): Promise<Goal | null>;
   findAllByUser(userId: Uuid, filters?: GoalFilters): Promise<Goal[]>;
   save(goal: Goal): Promise<void>;

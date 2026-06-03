@@ -30,6 +30,11 @@ export class GoalTypeOrmRepository implements IGoalRepository {
     return orm ? GoalMapper.toDomain(orm) : null;
   }
 
+  async findByIdInternal(id: Uuid): Promise<Goal | null> {
+    const orm = await this.repo.findOne({ where: { id: id.value } });
+    return orm ? GoalMapper.toDomain(orm) : null;
+  }
+
   async findByIdWithDeleted(id: Uuid, userId: Uuid): Promise<Goal | null> {
     const orm = await this.repo.findOne({
       where: { id: id.value, userId: userId.value },

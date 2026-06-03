@@ -9,6 +9,7 @@ import type { IStepRepository } from '../../domain/ports/step.repository';
 import type { IGoalInstanceRepository } from '../../../goals/domain/ports/goal-instance.repository';
 import type { IUnitOfWork } from '../../../../shared/application/ports/unit-of-work';
 import { ProgressCalculator } from '../../domain/services/progress-calculator';
+import { SyncConclusiveInstanceCycleService } from '../services/sync-conclusive-instance-cycle.service';
 import { STEP_TOKENS } from '../../infrastructure/step.tokens';
 import { Uuid } from '../../../../shared/domain/value-objects/uuid.vo';
 import { GoalInstanceNotFoundError } from '../../../goals/domain/errors/goal-instance-not-found.error';
@@ -49,6 +50,7 @@ export class CreateStepUseCase {
     private readonly instanceRepo: IGoalInstanceRepository,
     @Inject(STEP_TOKENS.UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
+    private readonly syncConclusiveCycle: SyncConclusiveInstanceCycleService,
   ) {}
 
   async execute(command: CreateStepCommand): Promise<Step> {
@@ -70,6 +72,7 @@ export class CreateStepUseCase {
       const newProgress = ProgressCalculator.calculate(combined);
       instance.updateProgress(newProgress);
       await this.instanceRepo.save(instance);
+      await this.syncConclusiveCycle.syncForInstance(instance);
     });
 
     return step;

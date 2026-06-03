@@ -13,6 +13,7 @@ import {
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { Goal } from '../domain/entities/goal.entity';
 import type { GoalInstance } from '../domain/entities/goal-instance.entity';
+import type { GoalDerivedMetrics } from '../domain/services/goal-derived-metrics';
 import {
   CurrentUser,
   type JwtPayload,
@@ -42,7 +43,7 @@ function toInstanceResponse(instance: GoalInstance) {
   };
 }
 
-function toGoalResponse(goal: Goal) {
+function toGoalResponse(goal: Goal, derivedMetrics: GoalDerivedMetrics = {}) {
   return {
     id: goal.id.value,
     userId: goal.userId.value,
@@ -52,9 +53,9 @@ function toGoalResponse(goal: Goal) {
     type: goal.type,
     cyclePeriod: goal.cyclePeriod,
     customCycleDays: goal.customCycleDays,
-    startDate: goal.startDate,
-    endDate: goal.endDate,
-    estimatedDurationMinutes: goal.estimatedDurationMinutes,
+    startDate: derivedMetrics.startDate ?? null,
+    endDate: derivedMetrics.endDate ?? null,
+    estimatedDurationMinutes: derivedMetrics.estimatedDurationMinutes ?? null,
     createdAt: goal.createdAt,
     updatedAt: goal.updatedAt,
     deletedAt: goal.deletedAt,
@@ -87,12 +88,9 @@ export class GoalsController {
       type: dto.type,
       cyclePeriod: dto.cyclePeriod,
       customCycleDays: dto.customCycleDays,
-      startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-      estimatedDurationMinutes: dto.estimatedDurationMinutes,
     });
     return {
-      ...toGoalResponse(goal),
+      ...toGoalResponse(goal, {}),
       activeInstance: toInstanceResponse(instance),
     };
   }
@@ -110,8 +108,8 @@ export class GoalsController {
       page: query.page,
       limit: query.limit,
     });
-    return results.map(({ goal, activeInstance }) => ({
-      ...toGoalResponse(goal),
+    return results.map(({ goal, activeInstance, derivedMetrics }) => ({
+      ...toGoalResponse(goal, derivedMetrics),
       activeInstance: activeInstance ? toInstanceResponse(activeInstance) : null,
     }));
   }
@@ -119,12 +117,13 @@ export class GoalsController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a goal with its active instance' })
   async getOne(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    const { goal, activeInstance } = await this.getGoalUseCase.execute({
-      id,
-      userId: user.userId,
-    });
+    const { goal, activeInstance, derivedMetrics } =
+      await this.getGoalUseCase.execute({
+        id,
+        userId: user.userId,
+      });
     return {
-      ...toGoalResponse(goal),
+      ...toGoalResponse(goal, derivedMetrics),
       activeInstance: activeInstance
         ? toInstanceResponse(activeInstance)
         : null,
@@ -138,7 +137,7 @@ export class GoalsController {
     @Body() dto: UpdateGoalDto,
     @CurrentUser() user: JwtPayload,
   ) {
-    const goal = await this.updateGoalUseCase.execute({
+    await this.updateGoalUseCase.execute({
       id,
       userId: user.userId,
       name: dto.name,
@@ -146,11 +145,18 @@ export class GoalsController {
       categoryId: dto.categoryId,
       cyclePeriod: dto.cyclePeriod,
       customCycleDays: dto.customCycleDays,
-      startDate: dto.startDate ? new Date(dto.startDate) : undefined,
-      endDate: dto.endDate ? new Date(dto.endDate) : undefined,
-      estimatedDurationMinutes: dto.estimatedDurationMinutes,
     });
-    return toGoalResponse(goal);
+    const { goal, activeInstance, derivedMetrics } =
+      await this.getGoalUseCase.execute({
+        id,
+        userId: user.userId,
+      });
+    return {
+      ...toGoalResponse(goal, derivedMetrics),
+      activeInstance: activeInstance
+        ? toInstanceResponse(activeInstance)
+        : null,
+    };
   }
 
   @Delete(':id')
@@ -164,11 +170,21 @@ export class GoalsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Restore a soft-deleted goal' })
   async restore(@Param('id') id: string, @CurrentUser() user: JwtPayload) {
-    const goal = await this.restoreGoalUseCase.execute({
+    await this.restoreGoalUseCase.execute({
       id,
       userId: user.userId,
     });
-    return toGoalResponse(goal);
+    const { goal, activeInstance, derivedMetrics } =
+      await this.getGoalUseCase.execute({
+        id,
+        userId: user.userId,
+      });
+    return {
+      ...toGoalResponse(goal, derivedMetrics),
+      activeInstance: activeInstance
+        ? toInstanceResponse(activeInstance)
+        : null,
+    };
   }
 
   @Get(':id/instances')

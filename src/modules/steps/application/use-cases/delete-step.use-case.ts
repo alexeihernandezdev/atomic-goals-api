@@ -5,6 +5,7 @@ import type { IUnitOfWork } from '../../../../shared/application/ports/unit-of-w
 import { ProgressCalculator } from '../../domain/services/progress-calculator';
 import { StepNotFoundError } from '../../domain/errors/step-not-found.error';
 import { GoalInstanceNotFoundError } from '../../../goals/domain/errors/goal-instance-not-found.error';
+import { SyncConclusiveInstanceCycleService } from '../services/sync-conclusive-instance-cycle.service';
 import { STEP_TOKENS } from '../../infrastructure/step.tokens';
 import { Uuid } from '../../../../shared/domain/value-objects/uuid.vo';
 
@@ -17,6 +18,7 @@ export class DeleteStepUseCase {
     private readonly instanceRepo: IGoalInstanceRepository,
     @Inject(STEP_TOKENS.UNIT_OF_WORK)
     private readonly unitOfWork: IUnitOfWork,
+    private readonly syncConclusiveCycle: SyncConclusiveInstanceCycleService,
   ) {}
 
   async execute(command: { id: string }): Promise<void> {
@@ -36,6 +38,7 @@ export class DeleteStepUseCase {
       );
       instance.updateProgress(ProgressCalculator.calculate(remaining));
       await this.instanceRepo.save(instance);
+      await this.syncConclusiveCycle.syncForInstance(instance);
     });
   }
 }

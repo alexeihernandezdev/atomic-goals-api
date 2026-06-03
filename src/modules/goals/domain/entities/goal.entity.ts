@@ -11,9 +11,6 @@ interface CreateGoalProps {
   type: GoalType;
   cyclePeriod?: CyclePeriod;
   customCycleDays?: number;
-  startDate?: Date;
-  endDate?: Date;
-  estimatedDurationMinutes?: number;
 }
 
 interface ReconstituteGoalProps extends CreateGoalProps {
@@ -29,9 +26,6 @@ interface UpdateGoalProps {
   categoryId?: Uuid;
   cyclePeriod?: CyclePeriod;
   customCycleDays?: number;
-  startDate?: Date;
-  endDate?: Date;
-  estimatedDurationMinutes?: number;
 }
 
 export class Goal {
@@ -44,9 +38,6 @@ export class Goal {
     private readonly _type: GoalType,
     private _cyclePeriod: CyclePeriod | undefined,
     private _customCycleDays: number | undefined,
-    private _startDate: Date | undefined,
-    private _endDate: Date | undefined,
-    private _estimatedDurationMinutes: number | undefined,
     private readonly _createdAt: Date,
     private _updatedAt: Date,
     private _deletedAt: Date | undefined,
@@ -80,9 +71,6 @@ export class Goal {
       props.type,
       props.cyclePeriod,
       props.customCycleDays,
-      props.startDate,
-      props.endDate,
-      props.estimatedDurationMinutes,
       now,
       now,
       undefined,
@@ -99,9 +87,6 @@ export class Goal {
       props.type,
       props.cyclePeriod,
       props.customCycleDays,
-      props.startDate,
-      props.endDate,
-      props.estimatedDurationMinutes,
       props.createdAt,
       props.updatedAt,
       props.deletedAt,
@@ -124,11 +109,6 @@ export class Goal {
     }
     if (props.customCycleDays !== undefined) {
       this._customCycleDays = props.customCycleDays;
-    }
-    if (props.startDate !== undefined) this._startDate = props.startDate;
-    if (props.endDate !== undefined) this._endDate = props.endDate;
-    if (props.estimatedDurationMinutes !== undefined) {
-      this._estimatedDurationMinutes = props.estimatedDurationMinutes;
     }
     this._updatedAt = new Date();
   }
@@ -193,15 +173,6 @@ export class Goal {
   }
   get customCycleDays(): number | undefined {
     return this._customCycleDays;
-  }
-  get startDate(): Date | undefined {
-    return this._startDate;
-  }
-  get endDate(): Date | undefined {
-    return this._endDate;
-  }
-  get estimatedDurationMinutes(): number | undefined {
-    return this._estimatedDurationMinutes;
   }
   get createdAt(): Date {
     return this._createdAt;

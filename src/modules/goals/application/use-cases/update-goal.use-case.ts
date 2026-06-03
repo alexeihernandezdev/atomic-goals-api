@@ -14,9 +14,6 @@ interface UpdateGoalCommand {
   categoryId?: string;
   cyclePeriod?: CyclePeriod;
   customCycleDays?: number;
-  startDate?: Date;
-  endDate?: Date;
-  estimatedDurationMinutes?: number;
 }
 
 @Injectable()
@@ -41,9 +38,6 @@ export class UpdateGoalUseCase {
         : undefined,
       cyclePeriod: command.cyclePeriod,
       customCycleDays: command.customCycleDays,
-      startDate: command.startDate,
-      endDate: command.endDate,
-      estimatedDurationMinutes: command.estimatedDurationMinutes,
     });
 
     await this.goalRepo.save(goal);

@@ -17,9 +17,6 @@ export class GoalMapper {
         ? (orm.cyclePeriod as CyclePeriod)
         : undefined,
       customCycleDays: orm.customCycleDays ?? undefined,
-      startDate: orm.startDate ?? undefined,
-      endDate: orm.endDate ?? undefined,
-      estimatedDurationMinutes: orm.estimatedDurationMinutes ?? undefined,
       createdAt: orm.createdAt,
       updatedAt: orm.updatedAt,
       deletedAt: orm.deletedAt ?? undefined,
@@ -36,9 +33,6 @@ export class GoalMapper {
     orm.type = domain.type;
     orm.cyclePeriod = domain.cyclePeriod ?? null;
     orm.customCycleDays = domain.customCycleDays ?? null;
-    orm.startDate = domain.startDate ?? null;
-    orm.endDate = domain.endDate ?? null;
-    orm.estimatedDurationMinutes = domain.estimatedDurationMinutes ?? null;
     orm.createdAt = domain.createdAt;
     orm.updatedAt = domain.updatedAt;
     orm.deletedAt = domain.deletedAt ?? null;

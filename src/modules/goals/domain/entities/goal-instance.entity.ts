@@ -24,7 +24,7 @@ export class GoalInstance {
   private constructor(
     private readonly _id: Uuid,
     private readonly _goalId: Uuid,
-    private readonly _cycleStart: Date,
+    private _cycleStart: Date,
     private _cycleEnd: Date,
     private _status: GoalInstanceStatus,
     private _progress: number,
@@ -83,6 +83,12 @@ export class GoalInstance {
 
   updateProgress(progress: number): void {
     this._progress = Math.min(100, Math.max(0, progress));
+    this._updatedAt = new Date();
+  }
+
+  updateCycleBounds(cycleStart: Date, cycleEnd: Date): void {
+    this._cycleStart = cycleStart;
+    this._cycleEnd = cycleEnd;
     this._updatedAt = new Date();
   }
 
