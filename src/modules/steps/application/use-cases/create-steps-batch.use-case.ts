@@ -9,13 +9,24 @@ import { StepFactory, type BuildStepCommand } from '../services/step-factory';
 import { STEP_TOKENS } from '../../infrastructure/step.tokens';
 import { Uuid } from '../../../../shared/domain/value-objects/uuid.vo';
 import { GoalInstanceNotFoundError } from '../../../goals/domain/errors/goal-instance-not-found.error';
+import { InvalidStepConfigError } from '../../domain/errors/invalid-step-config.error';
 
-interface CreateStepCommand extends BuildStepCommand {
+// Each item is a full step config (title already includes the day suffix, and
+// its own cycleDay). `order` is assigned from baseOrder + index.
+type CreateStepsBatchItem = Omit<BuildStepCommand, 'order'>;
+
+interface CreateStepsBatchCommand {
   goalInstanceId: string;
+  baseOrder: number;
+  steps: CreateStepsBatchItem[];
 }
 
+/**
+ * Creates several steps at once as a linked recurring group (one per day).
+ * All steps share a generated cycleGroupId; progress is recalculated once.
+ */
 @Injectable()
-export class CreateStepUseCase {
+export class CreateStepsBatchUseCase {
   constructor(
     @Inject(STEP_TOKENS.STEP_REPOSITORY)
     private readonly stepRepo: IStepRepository,
@@ -26,28 +37,35 @@ export class CreateStepUseCase {
     private readonly syncConclusiveCycle: SyncConclusiveInstanceCycleService,
   ) {}
 
-  async execute(command: CreateStepCommand): Promise<Step> {
+  async execute(command: CreateStepsBatchCommand): Promise<Step[]> {
+    if (command.steps.length === 0)
+      throw new InvalidStepConfigError('At least one step is required');
+
     const goalInstanceId = Uuid.from(command.goalInstanceId);
     const instance = await this.instanceRepo.findById(goalInstanceId);
     if (!instance) throw new GoalInstanceNotFoundError(command.goalInstanceId);
 
-    const step = StepFactory.build(command, goalInstanceId);
+    const cycleGroupId = Uuid.generate().value;
+    const steps = command.steps.map((item, i) => {
+      const step = StepFactory.build(
+        { ...item, order: command.baseOrder + i },
+        goalInstanceId,
+      );
+      step.assignCycleGroup(cycleGroupId);
+      return step;
+    });
 
     await this.unitOfWork.execute(async () => {
-      await this.stepRepo.save(step);
+      for (const step of steps) {
+        await this.stepRepo.save(step);
+      }
       const allSteps =
         await this.stepRepo.findActiveByGoalInstanceId(goalInstanceId);
-      // include the new step in the calculation
-      const combined = [
-        ...allSteps.filter((s) => s.id.value !== step.id.value),
-        step,
-      ];
-      const newProgress = ProgressCalculator.calculate(combined);
-      instance.updateProgress(newProgress);
+      instance.updateProgress(ProgressCalculator.calculate(allSteps));
       await this.instanceRepo.save(instance);
       await this.syncConclusiveCycle.syncForInstance(instance);
     });
 
-    return step;
+    return steps;
   }
 }

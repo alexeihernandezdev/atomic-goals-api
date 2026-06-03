@@ -16,6 +16,7 @@ import { StatusStep } from '../domain/entities/status-step.entity';
 import { CounterStep } from '../domain/entities/counter-step.entity';
 import type { Step } from '../domain/entities/step.entity';
 import { CreateStepUseCase } from '../application/use-cases/create-step.use-case';
+import { CreateStepsBatchUseCase } from '../application/use-cases/create-steps-batch.use-case';
 import { GetStepUseCase } from '../application/use-cases/get-step.use-case';
 import { UpdateStepMetadataUseCase } from '../application/use-cases/update-step-metadata.use-case';
 import { UpdateStepProgressUseCase } from '../application/use-cases/update-step-progress.use-case';
@@ -23,6 +24,7 @@ import { DeleteStepUseCase } from '../application/use-cases/delete-step.use-case
 import { RestoreStepUseCase } from '../application/use-cases/restore-step.use-case';
 import { ReorderStepUseCase } from '../application/use-cases/reorder-step.use-case';
 import { CreateStepDto } from './dto/create-step.dto';
+import { CreateStepsBatchDto } from './dto/create-steps-batch.dto';
 import { UpdateStepMetadataDto } from './dto/update-step-metadata.dto';
 import { UpdateStepProgressDto } from './dto/update-step-progress.dto';
 import { ReorderStepDto } from './dto/reorder-step.dto';
@@ -40,6 +42,7 @@ function toStepResponse(step: Step) {
     startDate: step.startDate,
     endDate: step.endDate,
     cycleDay: step.cycleDay,
+    cycleGroupId: step.cycleGroupId,
     estimatedDurationMinutes: step.estimatedDurationMinutes,
     createdAt: step.createdAt,
     updatedAt: step.updatedAt,
@@ -82,6 +85,7 @@ function toStepResponse(step: Step) {
 export class StepsController {
   constructor(
     private readonly createStepUseCase: CreateStepUseCase,
+    private readonly createStepsBatchUseCase: CreateStepsBatchUseCase,
     private readonly getStepUseCase: GetStepUseCase,
     private readonly updateStepMetadataUseCase: UpdateStepMetadataUseCase,
     private readonly updateStepProgressUseCase: UpdateStepProgressUseCase,
@@ -115,6 +119,37 @@ export class StepsController {
       estimatedDurationMinutes: dto.estimatedDurationMinutes,
     });
     return toStepResponse(step);
+  }
+
+  @Post('batch')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Create several steps at once as a linked recurring group',
+  })
+  async createBatch(@Body() dto: CreateStepsBatchDto) {
+    const steps = await this.createStepsBatchUseCase.execute({
+      goalInstanceId: dto.goalInstanceId,
+      baseOrder: dto.baseOrder,
+      steps: dto.steps.map((s) => ({
+        type: s.type,
+        title: s.title,
+        description: s.description,
+        weight: s.weight,
+        unit: s.unit,
+        current: s.current,
+        target: s.target,
+        max: s.max,
+        min: s.min,
+        done: s.done,
+        statuses: s.statuses,
+        currentStatusId: s.currentStatusId,
+        startDate: s.startDate ? new Date(s.startDate) : undefined,
+        endDate: s.endDate ? new Date(s.endDate) : undefined,
+        cycleDay: s.cycleDay,
+        estimatedDurationMinutes: s.estimatedDurationMinutes,
+      })),
+    });
+    return steps.map(toStepResponse);
   }
 
   @Get(':id')

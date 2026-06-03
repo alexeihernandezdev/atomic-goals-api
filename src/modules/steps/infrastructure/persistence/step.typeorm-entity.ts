@@ -49,6 +49,9 @@ export class StepOrmEntity {
   @Column({ type: 'varchar', nullable: true })
   cycleDay: string | null;
 
+  @Column({ type: 'varchar', nullable: true })
+  cycleGroupId: string | null;
+
   @CreateDateColumn()
   createdAt: Date;
 

@@ -30,6 +30,12 @@ const baseProps = (orm: StepOrmEntity) => ({
 
 export class StepMapper {
   static toDomain(orm: StepOrmEntity): Step {
+    const step = StepMapper.buildDomain(orm);
+    step.assignCycleGroup(orm.cycleGroupId ?? undefined);
+    return step;
+  }
+
+  private static buildDomain(orm: StepOrmEntity): Step {
     switch (orm.type as StepType) {
       case StepType.PROGRESS_BAR: {
         const pb = orm as ProgressBarStepOrmEntity;
@@ -107,6 +113,7 @@ export class StepMapper {
     orm.startDate = domain.startDate ?? null;
     orm.endDate = domain.endDate ?? null;
     orm.cycleDay = domain.cycleDay ?? null;
+    orm.cycleGroupId = domain.cycleGroupId ?? null;
     orm.estimatedDurationMinutes = domain.estimatedDurationMinutes ?? null;
     orm.createdAt = domain.createdAt;
     orm.updatedAt = domain.updatedAt;

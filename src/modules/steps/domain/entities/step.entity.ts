@@ -32,7 +32,15 @@ export abstract class Step {
     protected _deletedAt: Date | undefined,
   ) {}
 
+  // Links steps that were created together as a recurring group (one per day).
+  // Mutable field rather than a constructor param to avoid churning every subclass.
+  protected _cycleGroupId: string | undefined = undefined;
+
   abstract progress(): number;
+
+  assignCycleGroup(cycleGroupId: string | undefined): void {
+    this._cycleGroupId = cycleGroupId;
+  }
 
   updateMetadata(props: UpdateStepMetadataProps): void {
     if (props.title !== undefined) {
@@ -97,6 +105,9 @@ export abstract class Step {
   }
   get cycleDay(): string | undefined {
     return this._cycleDay;
+  }
+  get cycleGroupId(): string | undefined {
+    return this._cycleGroupId;
   }
   get createdAt(): Date {
     return this._createdAt;

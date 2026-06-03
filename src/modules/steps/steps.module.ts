@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CreateStepUseCase } from './application/use-cases/create-step.use-case';
+import { CreateStepsBatchUseCase } from './application/use-cases/create-steps-batch.use-case';
 import { GetStepUseCase } from './application/use-cases/get-step.use-case';
 import { ListStepsByGoalInstanceUseCase } from './application/use-cases/list-steps-by-goal-instance.use-case';
 import { UpdateStepMetadataUseCase } from './application/use-cases/update-step-metadata.use-case';
@@ -40,6 +41,7 @@ import { StepsController } from './presentation/steps.controller';
   providers: [
     SyncConclusiveInstanceCycleService,
     CreateStepUseCase,
+    CreateStepsBatchUseCase,
     GetStepUseCase,
     ListStepsByGoalInstanceUseCase,
     UpdateStepMetadataUseCase,

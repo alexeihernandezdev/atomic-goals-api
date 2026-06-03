@@ -29,10 +29,24 @@ export class DeleteStepUseCase {
     if (!instance)
       throw new GoalInstanceNotFoundError(step.goalInstanceId.value);
 
-    step.softDelete();
+    // Recurring steps created together share a cycleGroupId: deleting one
+    // removes the whole group.
+    const active = await this.stepRepo.findActiveByGoalInstanceId(
+      step.goalInstanceId,
+    );
+    const toDelete = step.cycleGroupId
+      ? active.filter((s) => s.cycleGroupId === step.cycleGroupId)
+      : [step];
+    // Ensure the target step is included even if not present in the active list.
+    if (!toDelete.some((s) => s.id.value === step.id.value)) {
+      toDelete.push(step);
+    }
 
     await this.unitOfWork.execute(async () => {
-      await this.stepRepo.save(step);
+      for (const s of toDelete) {
+        s.softDelete();
+        await this.stepRepo.save(s);
+      }
       const remaining = await this.stepRepo.findActiveByGoalInstanceId(
         step.goalInstanceId,
       );
